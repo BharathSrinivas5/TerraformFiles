@@ -89,41 +89,5 @@ resource "aws_security_group" "bb-sg" {
   }
 }
 
-data "aws_ami" "amazon-linux-image" {
-  most_recent = true
-  owners      = ["amazon"]
 
-  filter {
-    name   = "name"
-    values = ["amzn2-ami-hvm-*-x86_64-gp2"]
-  }
 
-  filter {
-    name   = "virtualization-type"
-    values = ["hvm"]
-  }
-}
-
-output "ami_id" {
-  value = data.aws_ami.amazon-linux-image.id
-}
-
-resource "aws_instance" "bb-app-server" {
-  ami                         = data.aws_ami.amazon-linux-image.id
-  instance_type               = "t2.micro"
-  key_name                    = "newkeyprac"
-  associate_public_ip_address = true
-  subnet_id                   = aws_subnet.bb-pub-sn.id
-  vpc_security_group_ids      = [aws_security_group.bb-sg.id]
-  availability_zone			  = "us-east-2b"
-  tags = {
-    Name = "bb-app-server"
-  }
- user_data = <<EOF
-#!/bin/bash
-sudo yum update -y
-sudo amazon-linux-extras install nginx1 -y 
-sudo systemctl enable nginx
-sudo systemctl start nginx
-              EOF
-}
